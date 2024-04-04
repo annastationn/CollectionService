@@ -1,13 +1,16 @@
 package dev.infochem.consoleapp.Commands;
+import dev.infochem.consoleapp.CommandHandler;
+import dev.infochem.consoleapp.ConsoleApp;
+
 import java.util.LinkedHashMap;
 public class RemoveKeyNull implements Command {
-    private LinkedHashMap<String, Command> commandMap;
-    public RemoveKeyNull (LinkedHashMap<String, Command> commandMap) {
-        this.commandMap = commandMap;
-        commandMap.put("remove_key", this);
+    private CommandHandler commandHandler = new CommandHandler();
+    public RemoveKeyNull (CommandHandler commandHandler) {
+        this.commandHandler = commandHandler;
+        ConsoleApp.commandList.put("remove_key", this);
     }
     @Override
     public void execute(String arguments) {
-        // commandHandler.remove_key_null(commandMap, arguments);
+         commandHandler.removeKey(arguments);
     }
 }

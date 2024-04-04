@@ -8,7 +8,7 @@ public enum OrganizationType {
         OPEN_JOINT_STOCK_COMPANY ("Открытое акционерное общество");
 
         private final String type;
-        OrganizationType (String type) {
+        OrganizationType(String type) {
                 this.type = type;
         }
         public String getType() {

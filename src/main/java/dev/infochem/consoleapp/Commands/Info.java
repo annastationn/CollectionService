@@ -1,13 +1,16 @@
 package dev.infochem.consoleapp.Commands;
+import dev.infochem.consoleapp.CommandHandler;
+import dev.infochem.consoleapp.ConsoleApp;
+
 import java.util.LinkedHashMap;
 public class Info implements Command {
-    private LinkedHashMap<String, Command> commandMap;
-    public Info (LinkedHashMap<String, Command> commandMap) {
-        this.commandMap = commandMap;
-        commandMap.put("show", this);
+    private CommandHandler commandHandler = new CommandHandler();
+    public Info (CommandHandler commandHandler) {
+        this.commandHandler = commandHandler;
+        ConsoleApp.commandList.put("info", this);
     }
     @Override
     public void execute(String arguments) {
-        // commandHandler.show(commandMap, arguments);
+         commandHandler.info(arguments);
     }
 }

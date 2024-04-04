@@ -1,13 +1,16 @@
 package dev.infochem.consoleapp.Commands;
+import dev.infochem.consoleapp.CommandHandler;
+import dev.infochem.consoleapp.ConsoleApp;
+
 import java.util.LinkedHashMap;
 public class PrintUniqueAnnualTurnover implements Command {
-    private LinkedHashMap<String, Command> commandMap;
-    public PrintUniqueAnnualTurnover (LinkedHashMap<String, Command> commandMap) {
-        this.commandMap = commandMap;
-        commandMap.put("print_unique_annual_turnover ", this);
+    private CommandHandler commandHandler = new CommandHandler();
+    public PrintUniqueAnnualTurnover (CommandHandler commandHandler) {
+        this.commandHandler = commandHandler;
+        ConsoleApp.commandList.put("print_unique_annual_turnover", this);
     }
     @Override
     public void execute(String arguments) {
-        // commandHandler.print_unique_annual_turnover(commandMap, arguments);
+        commandHandler.printUniqueAnnualTurnover(arguments);
     }
 }

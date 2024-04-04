@@ -4,8 +4,9 @@ import com.google.gson.Gson;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.LinkedHashMap;
 
-    public class JSONProvider {
+public class JSONProvider {
         private CollectionService collection;
         private String fileName;
 
@@ -21,5 +22,11 @@ import java.io.IOException;
             fileWriter.write(json);
             fileWriter.close();
         }
+
+        public void wait(LinkedHashMap<Long, Organization> collection) {
+        }
+
+    public void load() {
     }
+}
 

@@ -1,11 +1,15 @@
 package dev.infochem.consoleapp;
 import dev.infochem.consoleapp.Exceptions.ScriptRecursionException;
+import dev.infochem.consoleapp.OrganizationObject.OrganizationType;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+
+import static java.lang.Long.parseLong;
 
 public class CommandHandler {
     private CollectionService collectionService;
@@ -19,7 +23,7 @@ public class CommandHandler {
         jsonProvider = new JSONProvider();
     }
 
-    public void Help(String arguments) {
+    public void help(String arguments) {
         if (!arguments.isBlank()) {
             System.out.println("Неверные аргументы команды");//illegal args exception
         } else {
@@ -47,7 +51,7 @@ public class CommandHandler {
         }
     }
 
-    public void Info(String arguments) {
+    public void info(String arguments) {
         if (!arguments.isBlank()) {
             System.out.println("Неверные аргументы команды"); // illegal args exception
         } else {
@@ -55,28 +59,31 @@ public class CommandHandler {
         }
     }
 
-    public void Show(String arguments) {
+    public void show(String arguments) {
         if (!arguments.isBlank()) {
             System.out.println("Неверные аргументы команды"); // illegal args exception
         } else {
             collectionService.show();
         }
     }
-    public void Add(String arguments) {
-        if (!arguments.isBlank()) {
+
+    public void insert(String arguments) {
+        if (arguments.isBlank()) {
             System.out.println("Неверные аргументы команды"); // illegal args exception
         } else {
-            collectionService.addElement();
+            Long key = parseLong(arguments);
+            collectionService.addElement(key);
         }
     }
-    public void UpdateId(String arguments){  //args required
+
+    public void updateById(String arguments){  //args required
         if (arguments.isBlank()){
             System.out.println("Неверные аргументы команды"); // illegal args exception
         } else {
             try {
-                long current_id = Long.parseLong(arguments);
+                long current_id = parseLong(arguments);
                 if (current_id > 0){
-                    collectionService.createElement();
+                    collectionService.update(current_id);
                 } else {
                     System.out.println("id не может быть отрицательным");
                 }
@@ -86,14 +93,15 @@ public class CommandHandler {
             }
         }
     }
-    public void RemoveById(String arguments){ //args required
+
+    public void removeKey(String arguments){ //args required
         if (arguments.isBlank()){
             System.out.println("Неверные аргументы команды"); // illegal args exception
         } else {
             try {
-                long id = Long.parseLong(arguments);
+                long id = parseLong(arguments);
                 if (id > 0){
-                    collectionService.removeById(id);
+                    collectionService.removeKey(id);
                 } else {
                     System.out.println("id не может быть отрицательным");
                 }
@@ -102,19 +110,22 @@ public class CommandHandler {
             }
         }
     }
-    public void Clear(String arguments){
+
+    public void clear(String arguments){
         if (!arguments.isBlank()){
             System.out.println("Неверные аргументы команды"); // illegal args exception
         } else {
             collectionService.clear();
         }
     }
-    public void Save(String arguments){
+
+    public void save(String arguments){
         if (!arguments.isBlank()){
             System.out.println("Неверные аргументы команды"); // illegal args exception
         } else jsonProvider.wait(CollectionService.collection);
 }
-public void ExecuteScriptFileName (String path) throws NoSuchFieldException {
+
+    public void executeScript (String path) {
         if (path.isBlank()) {
             System.out.println("Неверные аргументы команды"); //illegal args exception
         } else {
@@ -124,7 +135,7 @@ public void ExecuteScriptFileName (String path) throws NoSuchFieldException {
                 Scanner scriptScanner = PromptScanner.getUserScanner();
 
                 Path scriptFile = pathToScript.getFileName();
-                if (!scriptScanner.hasNext()) {throw  new NoSuchFieldException();}
+                if (!scriptScanner.hasNext()) {throw  new NoSuchElementException();}
                 scriptsName.put(scriptFile.toString(), true);
                 do {
                     var command = "";
@@ -175,41 +186,35 @@ public void ExecuteScriptFileName (String path) throws NoSuchFieldException {
             } catch (InvalidPathException e){
                 System.out.println("Проверьте путь к файлу. В нём не должно быть лишних символов");
             }
-}
-}
-public void Exit(String arguments) {
-        if (!arguments.isBlank()) {
-            System.out.println("Неверные аргументы команды");// illegal args exception
-        } else {
-            System.out.println(
-                    """
-                        Если вы выйдете, изменения не сохранятся. Вы уверены, что хотите выйти?
-                        y = "Да"        любая другая клавиша = "Нет"  
-                            """);
-            Scanner scanner = new Scanner (System.in);
-            var answer = scanner.nextLine();
-            if (answer.equalsIgnoreCase("y")){
-                System.exit(0);
-            }
-        }
-}
-    public void RemoveGreater(String arguments){ //args required
-        if (arguments.isBlank()){
-            System.out.println("Неверные аргументы команды"); // illegal args exception
-        } else {
-            try {
-                long startId = Long.parseLong(arguments) + 1;
-                if (startId > 0) {
-                    collectionService.removeGreater(startId);
-                } else {
-                    System.out.println("id не может быть отрицательным");
-                }
-            } catch (NumberFormatException e){
-                System.out.println("Неверный формат аргументов");
-            }
         }
     }
-    public void History(String arguments){
+
+    public void exit(String arguments) {
+            if (!arguments.isBlank()) {
+                System.out.println("Неверные аргументы команды");// illegal args exception
+            } else {
+                System.out.println(
+                        """
+                            Если вы выйдете, изменения не сохранятся. Вы уверены, что хотите выйти?
+                            y = "Да"        любая другая клавиша = "Нет"  
+                                """);
+                Scanner scanner = new Scanner (System.in);
+                var answer = scanner.nextLine();
+                if (answer.equalsIgnoreCase("y")){
+                    System.exit(0);
+                }
+            }
+    }
+
+    public void removeLower(String arguments){ //args required
+        if (!arguments.isBlank()){
+            System.out.println("Неверные аргументы команды"); // illegal args exception
+        } else {
+            collectionService.removeLower();
+        }
+    }
+
+    public void history(String arguments){
         if (!arguments.isBlank()){
             System.out.println("Неверные аргументы команды"); // illegal args exception
         } else {
@@ -219,12 +224,57 @@ public void Exit(String arguments) {
             }
         }
     }
-    public static void AddCommand(String command){
+
+    public void removeGreaterKey(String arguments){
+        if (arguments.isBlank()) {
+            System.out.println("Неверные аргументы команды");
+        }
+        else {
+            try {
+                long startId = parseLong(arguments);
+                if (startId > 0) {
+                    collectionService.removeGreaterKey(startId);
+                } else {
+                    System.out.println("id не может быть отрицательным");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Неверный формат аргументов");
+            }
+        }
+
+    }
+
+    public void minByName(String arguments) {
+        if (!arguments.isBlank()) {
+            System.out.println("Неверные аргументы команды");
+        }
+        else{
+            collectionService.minByName();
+        }
+    }
+
+    public void filterGreaterThanType(String arguments){
+        if (arguments.isBlank()){
+            System.out.println("Неверные аргументы команды");
+        }
+        else{
+            collectionService.filterGreaterThanType(OrganizationType.valueOf(arguments));
+        }
+    }
+
+    public void printUniqueAnnualTurnover(String arguments){
+        if (!arguments.isBlank()){
+            System.out.println("Неверные аргументы команды");
+        }
+        else{
+            collectionService.printUniqueAnnualTurnover();
+        }
+    }
+
+    public static void addCommand(String command){
         if (commandHistory.size() == 7){
             commandHistory.removeFirst();
         }
         commandHistory.addLast(command);
     }
-
-    //добавить остаточные команды
 }

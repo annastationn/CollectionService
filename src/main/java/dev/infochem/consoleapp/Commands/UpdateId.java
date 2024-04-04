@@ -1,13 +1,16 @@
 package dev.infochem.consoleapp.Commands;
+import dev.infochem.consoleapp.CommandHandler;
+import dev.infochem.consoleapp.ConsoleApp;
+
 import java.util.LinkedHashMap;
 public class UpdateId implements Command {
-    private LinkedHashMap<String, Command> commandMap;
-    public UpdateId (LinkedHashMap<String, Command> commandMap) {
-        this.commandMap = commandMap;
-        commandMap.put("update", this);
+    private CommandHandler commandHandler;
+    public UpdateId (CommandHandler commandHandler) {
+        this.commandHandler = commandHandler;
+        ConsoleApp.commandList.put("update", this);
     }
     @Override
     public void execute(String arguments) {
-        // commandHandler.update_id(commandMap, arguments);
+         commandHandler.updateById(arguments);
     }
 }

@@ -3,9 +3,12 @@ package dev.infochem.consoleapp;
 import dev.infochem.consoleapp.OrganizationObject.*;
 import dev.infochem.consoleapp.Exceptions.*;
 
+import java.time.*;
 import java.util.*;
-import java.util.Date;
+import java.lang.*;
+
 import static dev.infochem.consoleapp.OrganizationObject.OrganizationType.*;
+import static java.lang.Long.parseLong;
 
 public class CollectionService {
     protected static Long elementsCount = 0L; //объявление статической переменной elementsCount, которая используется для хранения количества элементов в коллекции.
@@ -22,34 +25,33 @@ public class CollectionService {
     }
 
 
-  private class CompareOrganization implements Comparator<Organization>
-  //Опредление вложенного класса
-  {
+
+
+    private class CompareOrganization implements Comparator<Organization> {
 
         @Override
         public int compare(Organization o1, Organization o2) {
-            return o1.getName().length() - o2.getName().length();
+            return (int) (o1.getAnnualTurnover() - o2.getAnnualTurnover());
         }
         @Override
         public Comparator<Organization> reversed() {
             return Comparator.super.reversed();
         }
     }
-    protected record OrganizationWithOutId (String name, Coordinates coordinates, Date creationDate, float annualTurnover, OrganizationType organizationType, String officialAddress) {}
+    protected record OrganizationWithOutId (String name, Coordinates coordinates, ZonedDateTime creationDate, float annualTurnover, OrganizationType organizationType, Address officialAddress) {}
 
-    public void addElement() {
+    public void addElement(Long key) {
         OrganizationWithOutId source =  createElement();
-        elementsCount+=1;
         Organization newElement = new Organization(
-            elementsCount,
-            source.name,
-            source.coordinates,
-            source.creationDate,
-            source.officialAddress,
-            source.organizationType,
-            source.annualTurnover
+                key,
+                source.name,
+                source.coordinates,
+                source.creationDate,
+                source.annualTurnover,
+                source.organizationType,
+                source.officialAddress
         );
-        collection.put(elementsCount, newElement);
+        collection.put(key, newElement);
         System.out.println("Элемент успешно добавлен");
     }
     public void info() {
@@ -57,146 +59,200 @@ public class CollectionService {
         System.out.println("Дата создания: " + initializationDate);
         System.out.println("Количество элементов: " + collection.size());
     }
-    public void show(long current_id) {
-        if (!collection.containsKey(current_id)){
-            System.out.println("Элемента с таким id не существует");
-            return;
-        }
-        Iterator<Map.Entry<Long, Organization>> iterator = collection.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<Long, Organization> entry = iterator.next();
-            if (current_id == entry.getKey()) {
-                iterator.remove(); //удаление элемента через итератор
-            OrganizationWithOutId source = createElement();
-            Organization newElement = new Organization(
-                    current_id,
-                    source.name,
-                    source.coordinates,
-                    source.creationDate,
-                    source.id,
-                    source.officialAddress,
-                    source.type,
-                    source.annualTurnover
-            );
-            System.out.println("Элемент с id" + current_id + "успешно изменён");
-            break;
-        }
-    }
-}
-public void removeById(long id) {
-        if (!collection.containsKey(collection.get((int) id))){
-            System.out.println("Элемента с таким id не существует");
-            return;
-        }
-       collection.remove(id);
-    System.out.println("Элемент с id" + id + "успешно удалён");
-            }
 
-public void clear(){
-        collection.clear();
-    System.out.println("Все элементы успешно удалены");
-}
-public void removeGreater(long startId) {
-        long endId = collection.size();
-//проверка, что startId меньше или равен размеру коллекции
-        if (startId > collection.size()) {
-            System.out.println("Элемента с таким id не существует");
-        } else {
-            //удаление элементов с id больше startedid
-            collection.entrySet().removeIf(entry -> entry.getKey() > startId);
-            System.out.println("Элементы с id больше" + startId + "успешно");
-}
-    }
-public void reorder(){
-        //создание компаратора для сортировки
-        CompareOrganization comparator = new CompareOrganization();
-        //Преобразование LinkedHashMap в список для сортировки
-    List <Map.Entry<Long, Organization>> list = new ArrayList<>(collection.entrySet());
-        if (!isReversed) {
-            //Сортировка по убыванию
-            list.sort(Map.Entry.comparingByValue(comparator));
-            Collections.reverse(list);
-            isReversed = true;
-            System.out.println("//Коллекция отсортирована по убыванию/// \n");
-        } else {
-            //Сортировка по возрастанию
-            list.sort(Map.Entry.comparingByValue(comparator));
-            isReversed = false;
-            System.out.println("///Коллеция отсортирована по возрастанию/// \n");
-        }
-        //Обновление LinkedHashMap после сортировки
-    collection.clear();
-        list.forEach(entry -> collection.put(entry.getKey(), entry.getValue()));
-        show(elementsCount);
-}
-public void removeAllByType (OrganizationType type) {
-    //Удаление всех элементов определенного типа
-    collection.entrySet().removeIf(entry -> entry.getValue().getType().equals(type));
-    System.out.println("Организации типа" + type + "успешно удалены");
-}
-    //чет хуйня надо пересмотреть
-public void counterAnnualTurnover(float annualTurnover) {
-    //Подсчет количества организаций с годовым оборотом выше заданного
-    long count = collection.values().stream().filter(organization -> organization.getAnnualTurnover() > annualTurnover).count();
-    System.out.println("Годовой оборот выше заданного" + count);
-}
-public void filterStartsWithName(String prefix) {
-    //Фильтрация элементов,начинающихся с заданной строки
-    boolean hasItem = collection.values().stream().anyMatch(organization -> organization.getName().startsWith(prefix));
-    if (hasItem) {
-        collection.values().stream().filter(organization -> organization.getName().startsWith(prefix)).forEach(organization -> System.out.println(organization + "\n"));
-    } else {
-        System.out.println("Элементов с таким именем не существует");
-    }
-}
-private String askString (Scanner InputScanner) {
-    while(true) {
-        try {
-            String name = InputScanner.nextLine().trim();
-            if (name.isBlank()) {
-                throw new EmptyFieldException("Поле не может быть пустым. Введите его ещё раз: ");
+    public void show(){
+        if (collection.isEmpty()){
+            System.out.println("There is no elements in collection yet");
+        } else{
+            for (Map.Entry<Long,Organization> set : collection.entrySet()){
+                System.out.println(set.getValue().toString() + "\n");
             }
-            return name;
-        } catch (EmptyFieldException e) {
-            System.out.println(e.getMessage());
         }
     }
-}
-private float askX(Scanner InputScanner) {
-    while(true) {
-        try {
-            return Float.parseFloat(InputScanner.nextLine());
-        } catch (NumberFormatException e) {
-            System.out.println("Неверный формат числа. Введите его повторно: ");
+
+    public void update(long current_id){
+        if (!collection.containsValue(getElementById(collection, current_id))){
+            System.out.println("Element doesn't exist");
+        }
+        for (Map.Entry<Long,Organization> o:collection.entrySet()) {
+            if (current_id == o.getValue().getId()){
+                collection.remove(o.getKey());
+
+                OrganizationWithOutId ref = createElement();
+
+                elementsCount+=1;
+                Organization newElement = new Organization(
+                        elementsCount,
+                        ref.name,
+                        ref.coordinates,
+                        ref.creationDate,
+                        ref.annualTurnover,
+                        ref.organizationType,
+                        ref.officialAddress
+                );
+
+                collection.put(current_id,newElement);
+                System.out.println("Element with id " + current_id + " updated successfully");
+                break;
+
+            }
         }
     }
-}
-private double askY(Scanner InputScanner) {
-    while(true) {
-        try {
-            return Double.parseDouble(InputScanner.nextLine());
-        } catch (NumberFormatException e) {
-            System.out.println("Неверный формат числа. Введите его повторно: ");
+
+    public void removeKey(long id) {
+        if (!collection.containsKey(id)){
+            System.out.println("Элемента с таким id не существует");
+            return;
+        }
+        collection.remove(id);
+        System.out.println("Элемент с id" + id + "успешно удалён");
+    }
+
+    public void clear(){
+        collection.clear();
+        System.out.println("Все элементы успешно удалены");
+    }
+    public void removeLower() {
+        OrganizationWithOutId ref = createElement();
+
+        elementsCount+=1;
+        Organization newElement = new Organization(
+                elementsCount,
+                ref.name,
+                ref.coordinates,
+                ref.creationDate,
+                ref.annualTurnover,
+                ref.organizationType,
+                ref.officialAddress
+        );
+        CompareOrganization comparator = new CompareOrganization();
+        for (Map.Entry<Long,Organization> set : collection.entrySet()) {
+            if (comparator.compare(newElement, set.getValue()) > 0) {
+                collection.remove(set.getKey());
+            }
         }
     }
-}
-private float askFloat (Scanner InputScanner) {
-    while (true) {
-        try {
-            float num = Float.parseFloat(InputScanner.nextLine());
-            if (num > 0) {
-                return num;
-            } else {
-                throw new NegativeFieldException("Число не может быть отрицательным. Введите его ещё раз: ");
-            }}
-            catch(NumberFormatException e){
-                System.out.println("Неверный формат числа. Введите его повторно: ");
-            } catch(NegativeFieldException e){
+
+    public void removeGreaterKey(long startId) {
+        int counter = 0;
+        ArrayList<Organization> om = new ArrayList<>();
+        for (Map.Entry<Long, Organization> set : collection.entrySet()){
+            if (set.getValue().getId() > startId) {
+                om.add(set.getValue());
+                counter++;
+            }
+            else{
+                System.out.print("");
+            }
+        }
+        if (counter == 0){
+            System.out.println("There is no elements with keys greater than yours");
+        }
+        else{
+            for (Organization o : om){
+                collection.remove(o.getId());
+            }
+            System.out.println("Success: elements deleted: " + counter);
+        }
+    }
+
+    public void minByName() {
+        if (!collection.isEmpty()) {
+            Organization minEntry = null;
+            for (Map.Entry<Long, Organization> set : collection.entrySet()) {
+                if (minEntry == null || set.getValue().getName().length() < minEntry.getName().length()) {
+                    minEntry = set.getValue();
+                }
+            }
+            System.out.println("Минимальный элемент коллекции по имени: " + minEntry.toString());
+        }
+        else{
+            System.out.println("Коллекция пуста!");
+        }
+    }
+
+    public void filterGreaterThanType(OrganizationType standard){
+        boolean hasItem = false;
+        for (Map.Entry<Long,Organization> el : collection.entrySet()) {
+            if (el.getValue().getType().equals(standard)) {
+                hasItem = true;
+                break;
+            }
+        }
+        if (hasItem){
+            for (Map.Entry<Long,Organization> o : collection.entrySet()) {
+                if (String.valueOf(standard).length() < String.valueOf(o.getValue().getType()).length()){
+                    System.out.println(o.getValue().toString() + "\n");
+                }
+            }
+        } else {
+            System.out.println("Organizations with such standard of living don't exist");
+        }
+    }
+
+    public void printUniqueAnnualTurnover() {
+        if (!collection.isEmpty()) {
+            TreeSet<Float> set = new TreeSet<Float>();
+            for (Map.Entry<Long, Organization> o : collection.entrySet()) {
+                set.add(o.getValue().getAnnualTurnover());
+            }
+            for (Float num : set) {
+                System.out.println("Unique turnover: " + num);
+            }
+        }
+        else{
+            System.out.println("Коллекция пуста!");
+        }
+
+    }
+    private String askString (Scanner InputScanner) {
+        while(true) {
+            try {
+                String name = InputScanner.nextLine().trim();
+                if (name.isBlank()) {
+                    throw new EmptyFieldException("Поле не может быть пустым. Введите его ещё раз: ");
+                }
+                return name;
+            } catch (EmptyFieldException e) {
                 System.out.println(e.getMessage());
             }
         }
     }
-    private OrganizationType OrganizationType(Scanner InputScanner) {
+    private float askX(Scanner InputScanner) {
+        while(true) {
+            try {
+                return Float.parseFloat(InputScanner.nextLine());
+            } catch (NumberFormatException e) {
+                System.out.println("Неверный формат числа. Введите его повторно: ");
+            }
+        }
+    }
+    private double askY(Scanner InputScanner) {
+        while(true) {
+            try {
+                return Double.parseDouble(InputScanner.nextLine());
+            } catch (NumberFormatException e) {
+                System.out.println("Неверный формат числа. Введите его повторно: ");
+            }
+        }
+    }
+    private float askFloat (Scanner InputScanner) {
+        while (true) {
+            try {
+                float num = Float.parseFloat(InputScanner.nextLine());
+                if (num > 0) {
+                    return num;
+                } else {
+                    throw new NegativeFieldException("Число не может быть отрицательным. Введите его ещё раз: ");
+                }}
+                catch(NumberFormatException e){
+                    System.out.println("Неверный формат числа. Введите его повторно: ");
+                } catch(NegativeFieldException e){
+                    System.out.println(e.getMessage());
+                }
+            }
+        }
+    private OrganizationType askOrganizationType(Scanner InputScanner) {
         while (true) {
             try{
                 String type = InputScanner.nextLine().toUpperCase();
@@ -224,23 +280,23 @@ private float askFloat (Scanner InputScanner) {
         } catch (EmptyFieldException e){
                 System.out.println(e.getMessage());
             }
+        }
     }
-}
-        public long generateId() {
-            // Реализация метода генерации уникального идентификатора
-            return ++elementsCount; // Пример генерации уникального идентификатора
-        }
+    public int generateId() {
+        // Реализация метода генерации уникального идентификатора
+        return Math.toIntExact(++elementsCount); // Пример генерации уникального идентификатора
+    }
 
-        public void setId(long id) {
-            // Реализация метода для установки идентификатора элемента коллекции
-            // Например, можно просто установить значение id объекта
-            this.id = id;
-        }
+    public void setId(int id) {
+        // Реализация метода для установки идентификатора элемента коллекции
+        // Например, можно просто установить значение id объекта
+        this.id = id;
+    }
 
-        public void setCreationDate(Date creationDate) {
-            // Реализация метода для установки даты создания элемента коллекции
-            this.initializationDate = creationDate;
-        }
+    public void setCreationDate(Date creationDate) {
+        // Реализация метода для установки даты создания элемента коллекции
+        this.initializationDate = creationDate;
+    }
 
 
     public OrganizationWithOutId createElement(){
@@ -257,13 +313,13 @@ private float askFloat (Scanner InputScanner) {
 
         Coordinates coordinates = new Coordinates((long) x, (int) y);
 
-        Date creationDate = new Date();
+        ZonedDateTime creationDate = ZonedDateTime.of(LocalDateTime.now(), ZoneOffset.UTC);
 
         System.out.println("Введите годовой оборот");
         float annualTurnover = askFloat(InputScanner);
 
         System.out.println("Введите адрес организации");
-        String officialAddress = askString(InputScanner);
+        Address officialAddress = new Address(askString(InputScanner));
 
         System.out.print("""
                 Введите один из доступных типов организации:
@@ -273,7 +329,16 @@ private float askFloat (Scanner InputScanner) {
                  PRIVATE_LIMITED_COMPANY,
                  OPEN_JOINT_STOCK_COMPANY
                 """);
-        OrganizationType organizationType = OrganizationType(InputScanner);
-        return new OrganizationWithOutId(name, coordinates, creationDate, officialAddress, annualTurnover, organizationType);
+        OrganizationType organizationType = askOrganizationType(InputScanner);
+        return new OrganizationWithOutId(name, coordinates, creationDate, annualTurnover, organizationType, officialAddress);
+    }
+
+    public Organization getElementById(LinkedHashMap<Long,Organization> collection, Long id) {
+        for (Map.Entry<Long,Organization> o : collection.entrySet()) {
+            if (o.getValue().getId() == id) {
+                return o.getValue();
+            }
+        }
+        return null;
     }
 }
