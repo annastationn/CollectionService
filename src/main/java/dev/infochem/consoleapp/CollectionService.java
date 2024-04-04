@@ -41,18 +41,23 @@ public class CollectionService {
     protected record OrganizationWithOutId (String name, Coordinates coordinates, ZonedDateTime creationDate, float annualTurnover, OrganizationType organizationType, Address officialAddress) {}
 
     public void addElement(Long key) {
-        OrganizationWithOutId source =  createElement();
-        Organization newElement = new Organization(
-                key,
-                source.name,
-                source.coordinates,
-                source.creationDate,
-                source.annualTurnover,
-                source.organizationType,
-                source.officialAddress
-        );
-        collection.put(key, newElement);
-        System.out.println("Элемент успешно добавлен");
+        if (!collection.containsKey(key)) {
+            OrganizationWithOutId source = createElement();
+            Organization newElement = new Organization(
+                    key,
+                    source.name,
+                    source.coordinates,
+                    source.creationDate,
+                    source.annualTurnover,
+                    source.organizationType,
+                    source.officialAddress
+            );
+            collection.put(key, newElement);
+            System.out.println("Элемент успешно добавлен");
+        }
+        else{
+            System.out.println("Element already exists. Use update command.");
+        }
     }
     public void info() {
         System.out.println("Тип коллекции: " + collection.getClass().getName());
