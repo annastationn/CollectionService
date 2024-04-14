@@ -7,6 +7,10 @@ public class Address {
         this.zipCode = zipCode;
     }
     public boolean isValidZipCode() {
-        return zipCode.length() <= 19;
+        return zipCode == null || zipCode.length() <= 19;
+    }
+    @Override
+    public String toString() {
+        return zipCode;
     }
     }

@@ -6,11 +6,15 @@ import dev.infochem.consoleapp.Exceptions.*;
 import java.time.*;
 import java.util.*;
 import java.lang.*;
+import java.util.HashSet;
+import java.util.Set;
 
 import static dev.infochem.consoleapp.OrganizationObject.OrganizationType.*;
 import static java.lang.Long.parseLong;
 
 public class CollectionService {
+    private long maxId = 0;
+    private Set<Long> existingIds = new HashSet<>();
     protected static Long elementsCount = 0L; //объявление статической переменной elementsCount, которая используется для хранения количества элементов в коллекции.
     private Date initializationDate;
     protected static LinkedHashMap<Long, Organization> collection;
@@ -37,11 +41,14 @@ public class CollectionService {
     }
     protected record OrganizationWithOutId (String name, Coordinates coordinates, ZonedDateTime creationDate, float annualTurnover, OrganizationType organizationType, Address officialAddress) {}
 
-    public void addElement(Long key) {
-        if (!collection.containsKey(key)) {
+    public void addElement(long id) {
+        if (id > maxId) {
+            maxId = id;
+        }
+        if (!collection.containsKey(id)) {
             OrganizationWithOutId source = createElement();
             Organization newElement = new Organization(
-                    key,
+                    id,
                     source.name,
                     source.coordinates,
                     source.creationDate,
@@ -49,13 +56,21 @@ public class CollectionService {
                     source.organizationType,
                     source.officialAddress
             );
-            collection.put(key, newElement);
+            collection.put(id, newElement);
             System.out.println("Элемент успешно добавлен");
         }
         else{
             System.out.println("Element already exists. Use update command.");
         }
+        existingIds.add(id);
+}
+    public long getMaxId() {
+        return maxId;
     }
+    public boolean containsId(long id) {
+        return existingIds.contains(id);
+    }
+
     public void info() {
         System.out.println("Тип коллекции: " + collection.getClass().getName());
         System.out.println("Дата создания: " + initializationDate);
@@ -72,19 +87,18 @@ public class CollectionService {
         }
     }
 
-    public void update(long current_id){
-        if (!collection.containsValue(getElementById(collection, current_id))){
-            System.out.println("Element doesn't exist");
+    public void update(long current_id) {
+        if (!collection.containsValue(getElementById(collection, current_id))) {
+            System.out.println("Элемент с таким id не существует");
+            return;
         }
-        for (Map.Entry<Long,Organization> o:collection.entrySet()) {
-            if (current_id == o.getValue().getId()){
-                collection.remove(o.getKey());
-
+        for (Map.Entry<Long, Organization> o : collection.entrySet()) {
+            if (current_id == o.getValue().getId()) {
+                // Создаем новый объект с обновленными данными, но с тем же id
                 OrganizationWithOutId ref = createElement();
 
-                elementsCount+=1;
                 Organization newElement = new Organization(
-                        elementsCount,
+                        current_id, // Используем исходный id
                         ref.name,
                         ref.coordinates,
                         ref.creationDate,
@@ -93,22 +107,38 @@ public class CollectionService {
                         ref.officialAddress
                 );
 
-                collection.put(current_id,newElement);
-                System.out.println("Element with id " + current_id + " updated successfully");
+                // Заменяем старый объект новым, сохраняя исходный ключ
+                collection.put(o.getKey(), newElement);
+                System.out.println("Элемент с id " + current_id + " обновлен успешно");
                 break;
-
             }
         }
     }
 
     public void removeKey(long id) {
-        if (!collection.containsKey(id)){
+        if (!collection.containsKey(id)) {
             System.out.println("Элемента с таким id не существует");
             return;
         }
+
         collection.remove(id);
-        System.out.println("Элемент с id" + id + "успешно удалён");
+        System.out.println("Элемент с id " + id + " успешно удалён");
+
+        // Создаем временную карту для обновления ключей
+        Map<Long, Organization> updatedCollection = new LinkedHashMap<>();
+        long newId = 1;
+        for (Organization org : collection.values()) {
+            updatedCollection.put(newId, org);
+            org.setId(newId++);
+        }
+
+        // Обновляем исходную коллекцию
+        collection.clear();
+        collection.putAll(updatedCollection);
     }
+
+
+
 
     public void clear(){
         collection.clear();

@@ -72,10 +72,16 @@ public class CommandHandler {
             System.out.println("Неверные аргументы команды"); // illegal args exception
         } else {
             Long key = parseLong(arguments);
-                collectionService.addElement(key);
+            // Проверяем, что все промежуточные номера уже присутствуют в коллекции
+            for (long i = 1; i < key; i++) {
+                if (!collectionService.containsId(i)) {
+                    System.out.println("Нельзя создать объект с номером, пока не создан объект с номером " + i);
+                    return;
+                }
             }
-        }
-
+            // Если все промежуточные номера уже существуют, добавляем объект
+            collectionService.addElement(key);
+        }}
 
     public void updateById(String arguments){  //args required
         if (arguments.isBlank()){
