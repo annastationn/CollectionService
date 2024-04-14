@@ -1,8 +1,7 @@
 package dev.infochem.consoleapp.Commands;
 import dev.infochem.consoleapp.CommandHandler;
 import dev.infochem.consoleapp.ConsoleApp;
-
-import java.util.LinkedHashMap;
+import dev.infochem.consoleapp.Organization;
 
 public class Show implements Command {
     private CommandHandler commandHandler;

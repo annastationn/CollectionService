@@ -1,8 +1,8 @@
 package dev.infochem.consoleapp.Commands;
 import dev.infochem.consoleapp.CommandHandler;
 import dev.infochem.consoleapp.ConsoleApp;
+import dev.infochem.consoleapp.Organization;
 
-import java.util.LinkedHashMap;
 public class Help implements Command {
     private CommandHandler commandHandler = new CommandHandler();
     public Help (CommandHandler commandHandler) {
@@ -10,7 +10,7 @@ public class Help implements Command {
         ConsoleApp.commandList.put("help", this);
     }
     @Override
-    public void execute(String arguments) {
+    public void execute(String arguments){
          commandHandler.help(arguments);
     }
 }

@@ -1,6 +1,7 @@
 package dev.infochem.consoleapp.Commands;
 import dev.infochem.consoleapp.CommandHandler;
 import dev.infochem.consoleapp.ConsoleApp;
+import dev.infochem.consoleapp.Organization;
 
 import java.util.LinkedHashMap;
 public class Exit implements Command {

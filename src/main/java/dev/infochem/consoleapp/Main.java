@@ -2,12 +2,6 @@ package dev.infochem.consoleapp;
 
 import dev.infochem.consoleapp.Commands.*;
 
-import dev.infochem.consoleapp.ConsoleApp;
-import dev.infochem.consoleapp.JSONProvider;
-import dev.infochem.consoleapp.PromptScanner;
-import dev.infochem.consoleapp.CommandHandler;
-
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
 import java.util.Scanner;

@@ -72,9 +72,10 @@ public class CommandHandler {
             System.out.println("Неверные аргументы команды"); // illegal args exception
         } else {
             Long key = parseLong(arguments);
-            collectionService.addElement(key);
+                collectionService.addElement(key);
+            }
         }
-    }
+
 
     public void updateById(String arguments){  //args required
         if (arguments.isBlank()){

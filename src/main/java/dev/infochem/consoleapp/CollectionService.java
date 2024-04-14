@@ -24,9 +24,6 @@ public class CollectionService {
         this.initializationDate = new Date();
     }
 
-
-
-
     private class CompareOrganization implements Comparator<Organization> {
 
         @Override
